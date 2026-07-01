@@ -1,5 +1,6 @@
 dependencies:
-  lvgl/lvgl: "9.5.0"
+  lvgl/lvgl:
+    version: "9.5.0"
   espressif/usb:
     version: ">=1.4"
     rules:

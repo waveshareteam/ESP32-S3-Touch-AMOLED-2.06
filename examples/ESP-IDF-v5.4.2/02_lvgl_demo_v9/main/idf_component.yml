@@ -6,5 +6,6 @@ dependencies:
       - if: "idf_version >= 6.0"
   waveshare/esp32_s3_touch_amoled_2_06:
     version: "*"
-  lvgl/lvgl: "9.5.0"
+  lvgl/lvgl:
+    version: "9.5.0"
     public: true

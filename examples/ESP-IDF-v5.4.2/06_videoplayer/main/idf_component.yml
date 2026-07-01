@@ -4,7 +4,8 @@ dependencies:
     version: ">=1.4"
     rules:
       - if: "idf_version >= 6.0"
-  lvgl/lvgl: "9.5.0"
+  lvgl/lvgl:
+    version: "9.5.0"
     public: true
   espressif/avi_player: =*
   espressif/esp_new_jpeg: =*
