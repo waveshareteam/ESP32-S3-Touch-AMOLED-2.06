@@ -21,38 +21,6 @@ GLOBAL_EXAMPLE_PATTERNS = (
     "config/**/*.defaults",
 )
 DEFAULT_IDF_VERSIONS = ("v5.5.4", "v6.0.1")
-IDF_V5_ONLY_KEYWORDS = (
-    "axp",
-    "audio",
-    "board",
-    "brookesia",
-    "bsp",
-    "camera",
-    "color",
-    "display",
-    "gpio",
-    "i2c",
-    "i2s",
-    "immersive",
-    "imu",
-    "lcd",
-    "lvgl",
-    "mp4",
-    "pcf",
-    "pmu",
-    "qmi",
-    "rgb",
-    "rs485",
-    "rtc",
-    "sd",
-    "spec",
-    "spi",
-    "touch",
-    "twai",
-    "usb",
-    "video",
-    "wifi",
-)
 
 
 def run_git(args: list[str]) -> list[str]:
