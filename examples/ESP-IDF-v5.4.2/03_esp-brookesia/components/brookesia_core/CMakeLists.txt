@@ -129,7 +129,7 @@ endif()
 idf_component_register(
     SRCS ${SRCS_C} ${SRCS_CPP}
     INCLUDE_DIRS ${INCLUDE_DIRS}
-    REQUIRES json esp_netif esp_wifi nvs_flash
+    REQUIRES esp_netif esp_wifi nvs_flash
 )
 include(package_manager)
 cu_pkg_define_version(${CMAKE_CURRENT_LIST_DIR})
