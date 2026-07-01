@@ -1,7 +1,10 @@
 ## IDF Component Manager Manifest File
 dependencies:
+  espressif/usb:
+    version: ">=1.4"
+    rules:
+      - if: "idf_version >= 6.0"
   waveshare/esp32_s3_touch_amoled_2_06:
     version: "*"
-  lvgl/lvgl:
-    version: "9.2.0"
+  lvgl/lvgl: "9.5.0"
     public: true
