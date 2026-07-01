@@ -152,9 +152,6 @@ def github_output(name: str, value: str) -> None:
 
 
 def versions_for_example(example: str) -> tuple[str, ...]:
-    normalized = example.lower().replace("-", "_")
-    if any(keyword in normalized for keyword in IDF_V5_ONLY_KEYWORDS):
-        return ("v5.5.4",)
     return DEFAULT_IDF_VERSIONS
 
 
