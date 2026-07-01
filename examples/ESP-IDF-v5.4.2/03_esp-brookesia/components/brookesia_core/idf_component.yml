@@ -4,6 +4,11 @@ url: https://github.com/espressif/esp-brookesia/tree/master/core/brookesia_core
 issues: https://github.com/espressif/esp-brookesia/issues
 repository: https://github.com/espressif/esp-brookesia.git
 dependencies:
+  espressif/cjson:
+    version: "^1.7.15"
+    public: true
+    rules:
+      - if: "idf_version >= 6.0"
   idf: ">=5.3"
 
   # Utilities
