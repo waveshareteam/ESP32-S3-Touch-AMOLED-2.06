@@ -1,6 +1,9 @@
 ## IDF Component Manager Manifest File
 dependencies:
-  lvgl/lvgl:
-    version: "^9.2.0"
+  espressif/usb:
+    version: ">=1.4"
+    rules:
+      - if: "idf_version >= 6.0"
+  lvgl/lvgl: "9.5.0"
     public: true
   espressif/esp-dsp: '*'
