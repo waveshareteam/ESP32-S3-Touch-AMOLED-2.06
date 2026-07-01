@@ -3,9 +3,9 @@ dependencies:
   ## Required IDF version
   idf: ">=5.5.0"
 
-  waveshare/qmi8658: 
+  waveshare/qmi8658:
     version: "*"
   waveshare/esp32_s3_touch_amoled_2_06: "*"
   lvgl/lvgl:
-    version: "^9.2.0"
+    version: "9.5.0"
     public: true

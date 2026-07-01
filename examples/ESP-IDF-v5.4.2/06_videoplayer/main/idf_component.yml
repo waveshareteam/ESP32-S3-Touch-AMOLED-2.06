@@ -1,7 +1,7 @@
 ## IDF Component Manager Manifest File
 dependencies:
   lvgl/lvgl:
-    version: 9.2.0
+    version: "9.5.0"
     public: true
   espressif/avi_player: =*
   espressif/esp_new_jpeg: =*

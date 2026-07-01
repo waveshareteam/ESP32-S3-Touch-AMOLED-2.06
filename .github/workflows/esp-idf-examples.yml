@@ -1,0 +1,103 @@
+name: ESP-IDF examples
+
+on:
+  pull_request:
+    paths:
+      - "examples/**"
+      - "firmware/**"
+      - "Firmware/**"
+      - "FirmWare/**"
+      - "config/**"
+      - ".github/workflows/esp-idf-examples.yml"
+      - ".github/scripts/discover_esp_idf_examples.py"
+  push:
+    branches:
+      - main
+    paths:
+      - "examples/**"
+      - "firmware/**"
+      - "Firmware/**"
+      - "FirmWare/**"
+      - "config/**"
+      - ".github/workflows/esp-idf-examples.yml"
+      - ".github/scripts/discover_esp_idf_examples.py"
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "ESP-IDF example or firmware project directory name, path, or all"
+        required: false
+        default: "all"
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    name: Discover examples
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.examples.outputs.matrix }}
+      has_examples: ${{ steps.examples.outputs.has_examples }}
+      examples: ${{ steps.examples.outputs.examples }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Discover changed ESP-IDF examples
+        id: examples
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            python .github/scripts/discover_esp_idf_examples.py \
+              --example "${{ inputs.project }}"
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            python .github/scripts/discover_esp_idf_examples.py \
+              --base-ref "${{ github.event.pull_request.base.sha }}" \
+              --head-ref "${{ github.sha }}" \
+              --fallback-all
+          else
+            before="${{ github.event.before }}"
+            if [[ "$before" == "0000000000000000000000000000000000000000" ]]; then
+              before=""
+            fi
+            python .github/scripts/discover_esp_idf_examples.py \
+              --base-ref "$before" \
+              --head-ref "${{ github.sha }}" \
+              --fallback-all
+          fi
+
+      - name: Summary
+        shell: bash
+        run: |
+          if [[ "${{ steps.examples.outputs.has_examples }}" == "true" ]]; then
+            {
+              echo "### ESP-IDF examples selected"
+              echo
+              echo '${{ steps.examples.outputs.examples }}' | tr ',' '\n' | sed '/^$/d' | sed 's/^/- /'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No ESP-IDF example changes detected." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  build:
+    name: Build ${{ matrix.example }} (${{ matrix.idf_version }})
+    needs: discover
+    if: needs.discover.outputs.has_examples == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build with ESP-IDF
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf_version }}
+          target: esp32s3
+          path: ${{ matrix.example }}
