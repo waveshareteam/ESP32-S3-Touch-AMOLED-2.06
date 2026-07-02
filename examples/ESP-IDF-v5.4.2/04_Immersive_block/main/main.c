@@ -12,6 +12,9 @@
 #include "bsp/display.h"
 #include "driver/gpio.h"
 
+#ifdef M_PI
+#undef M_PI
+#endif
 #include "qmi8658.h"
 i2c_master_bus_handle_t bus_handle;
 static const char *TAG = "gyro_shapes";

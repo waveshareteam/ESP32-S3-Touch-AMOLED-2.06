@@ -410,7 +410,7 @@ bool LvObject::hasFlags(StyleFlag flags) const
     }
 
     if (flags | STYLE_FLAG_CLIP_CORNER) {
-        result &= lv_obj_get_style_clip_corner(_native_handle, static_cast<int>(LV_PART_MAIN) | static_cast<int>(LV_STATE_DEFAULT));
+        result &= lv_obj_get_style_clip_corner(_native_handle, static_cast<lv_part_t>(static_cast<int>(LV_PART_MAIN) | static_cast<int>(LV_STATE_DEFAULT)));
     }
 
     ESP_UTILS_LOG_TRACE_EXIT_WITH_THIS();

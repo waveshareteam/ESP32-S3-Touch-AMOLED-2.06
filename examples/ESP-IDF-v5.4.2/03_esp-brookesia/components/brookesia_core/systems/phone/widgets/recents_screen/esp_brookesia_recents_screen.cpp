@@ -307,11 +307,11 @@ bool RecentsScreen::checkPointInsideMain(lv_point_t &point) const
 
     lv_obj_refr_pos(_main_obj.get());
     lv_obj_get_coords(_main_obj.get(), &area);
-    point_in_main = _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(_main_obj.get(), 0));
+    point_in_main = _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(_main_obj.get(), LV_PART_MAIN));
 
     lv_obj_refr_pos(_trash_obj.get());
     lv_obj_get_coords(_trash_obj.get(), &area);
-    point_in_trash = _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(_trash_obj.get(), 0));
+    point_in_trash = _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(_trash_obj.get(), LV_PART_MAIN));
 
     return point_in_main && !point_in_trash;
 }
@@ -326,7 +326,7 @@ bool RecentsScreen::checkPointInsideTable(lv_point_t &point) const
     lv_obj_refr_pos(_snapshot_table.get());
     lv_obj_get_coords(_snapshot_table.get(), &area);
 
-    return _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(_snapshot_table.get(), 0));
+    return _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(_snapshot_table.get(), LV_PART_MAIN));
 }
 
 bool RecentsScreen::checkPointInsideSnapshot(int id, lv_point_t &point) const
@@ -343,7 +343,7 @@ bool RecentsScreen::checkPointInsideSnapshot(int id, lv_point_t &point) const
     lv_obj_refr_pos(snapshot_main_obj);
     lv_obj_get_coords(snapshot_main_obj, &area);
 
-    return _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(snapshot_main_obj, 0));
+    return _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(snapshot_main_obj, LV_PART_MAIN));
 }
 
 int RecentsScreen::getSnapshotOriginY(int id) const

@@ -67,4 +67,5 @@ constexpr Stylesheet STYLESHEET_410_502_DARK = {
 
 } // namespace esp_brookesia::systems::phone
 
+#undef ESP_BROOKESIA_PHONE_DEFAULT_DARK_STYLESHEET
 #define ESP_BROOKESIA_PHONE_DEFAULT_DARK_STYLESHEET() esp_brookesia::systems::phone::STYLESHEET_410_502_DARK

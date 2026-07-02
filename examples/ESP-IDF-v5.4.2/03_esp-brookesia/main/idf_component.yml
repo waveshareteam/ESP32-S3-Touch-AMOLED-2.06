@@ -1,3 +1,7 @@
 ## IDF Component Manager Manifest File
 dependencies:
+  espressif/usb:
+    version: "^1.4.1"
+  lvgl/lvgl:
+    version: "9.5.0"
   waveshare/esp32_s3_touch_amoled_2_06: "*"

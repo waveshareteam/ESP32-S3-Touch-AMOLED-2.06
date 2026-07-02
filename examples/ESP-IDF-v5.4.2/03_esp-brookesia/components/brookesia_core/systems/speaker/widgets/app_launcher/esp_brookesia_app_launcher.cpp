@@ -309,7 +309,7 @@ bool AppLauncher::checkPointInsideMain(lv_point_t &point) const
     lv_obj_refr_pos(_main_obj.get());
     lv_obj_get_coords(_main_obj.get(), &area);
 
-    return _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(_main_obj.get(), 0));
+    return _lv_area_is_point_on(&area, &point, lv_obj_get_style_radius(_main_obj.get(), LV_PART_MAIN));
 }
 
 bool AppLauncher::calibrateData(const gui::StyleSize &screen_size, const base::Display &display,
