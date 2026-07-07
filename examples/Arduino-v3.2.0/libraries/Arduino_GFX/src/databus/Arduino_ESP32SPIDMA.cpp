@@ -58,12 +58,8 @@ bool Arduino_ESP32SPIDMA::begin(int32_t speed, int8_t dataMode)
   _speed = (speed == GFX_NOT_DEFINED) ? SPI_DEFAULT_FREQ : speed;
   _dataMode = (dataMode == GFX_NOT_DEFINED) ? SPI_MODE0 : dataMode;
 
-  if (!_div)
-  {
-    _div = spiFrequencyToClockDiv(_speed);
-  }
-
   // set pin mode
+
   if (_dc != GFX_NOT_DEFINED)
   {
     pinMode(_dc, OUTPUT);
