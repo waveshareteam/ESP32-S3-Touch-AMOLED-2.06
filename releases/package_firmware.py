@@ -12,10 +12,11 @@ import sys
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 
 DEFAULT_BAUD = "460800"
+COMBINED_BIN = "combined.bin"
 
 
 def slugify(value: str) -> str:
@@ -50,17 +51,47 @@ def write_text(path: Path, content: str, executable: bool = False) -> None:
         path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
-def copy_file(src: Path, firmware_dir: Path, offset: str | None = None) -> str:
+def copy_combined_file(src: Path, firmware_dir: Path) -> str:
     if not src.exists():
         raise FileNotFoundError(f"missing firmware file: {src}")
-    prefix = f"{offset.lower()}_" if offset else ""
-    dst_name = slugify(prefix + src.name)
-    dst = firmware_dir / dst_name
+    dst = firmware_dir / COMBINED_BIN
     shutil.copy2(src, dst)
-    return f"bin/{dst_name}"
+    return f"bin/{COMBINED_BIN}"
 
 
-def esp_idf_flash_entries(build_dir: Path, firmware_dir: Path) -> tuple[list[str], list[dict[str, str]], dict]:
+def write_combined_bin(segments: list[tuple[str, Path, str]], dst: Path) -> list[dict[str, Any]]:
+    if not segments:
+        raise ValueError("no firmware segments found for combined image")
+
+    parsed: list[tuple[int, str, Path, str]] = []
+    for offset, src, source_name in segments:
+        if not src.exists():
+            raise FileNotFoundError(f"missing firmware file: {src}")
+        parsed.append((parse_offset(offset), offset, src, source_name))
+
+    position = 0
+    source_entries: list[dict[str, Any]] = []
+    with dst.open("wb") as out:
+        for offset_value, offset_text, src, source_name in sorted(parsed, key=lambda item: item[0]):
+            if offset_value < position:
+                raise ValueError(f"firmware segment overlaps at {offset_text}: {source_name}")
+            if offset_value > position:
+                out.write(b"\xff" * (offset_value - position))
+            data = src.read_bytes()
+            out.write(data)
+            source_entries.append(
+                {
+                    "offset": offset_text,
+                    "source": source_name,
+                    "size": len(data),
+                }
+            )
+            position = offset_value + len(data)
+
+    return source_entries
+
+
+def esp_idf_flash_entries(build_dir: Path, firmware_dir: Path) -> tuple[list[str], list[dict[str, Any]], dict[str, Any]]:
     flasher_args_path = build_dir / "flasher_args.json"
     if not flasher_args_path.exists():
         raise FileNotFoundError(f"missing ESP-IDF flasher args: {flasher_args_path}")
@@ -70,53 +101,70 @@ def esp_idf_flash_entries(build_dir: Path, firmware_dir: Path) -> tuple[list[str
     if not isinstance(flash_files, dict) or not flash_files:
         raise ValueError(f"no flash_files found in {flasher_args_path}")
 
-    entries: list[dict[str, str]] = []
-    command_pairs: list[str] = []
+    segments: list[tuple[str, Path, str]] = []
     for offset, rel_path in sorted(flash_files.items(), key=lambda item: parse_offset(item[0])):
         src = Path(rel_path)
         if not src.is_absolute():
             src = build_dir / src
-        copied = copy_file(src, firmware_dir, offset)
         rel_source = Path(rel_path)
         source_name = rel_source.name if rel_source.is_absolute() else rel_source.as_posix()
-        entries.append({"offset": offset, "file": copied, "source": source_name})
-        command_pairs.extend([offset, copied])
+        segments.append((offset, src, source_name))
 
-    return command_pairs, entries, data
+    combined_rel = f"bin/{COMBINED_BIN}"
+    source_entries = write_combined_bin(segments, firmware_dir / COMBINED_BIN)
+    files: list[dict[str, Any]] = [
+        {
+            "offset": "0x0",
+            "file": combined_rel,
+            "source": "combined ESP-IDF image",
+            "segments": source_entries,
+        }
+    ]
+    return ["0x0", combined_rel], files, data
 
 
-def arduino_flash_entries(build_dir: Path, firmware_dir: Path) -> tuple[list[str], list[dict[str, str]]]:
+def arduino_flash_entries(build_dir: Path, firmware_dir: Path) -> tuple[list[str], list[dict[str, Any]]]:
     bins = sorted(build_dir.rglob("*.bin"), key=lambda path: path.as_posix().lower())
     if not bins:
         raise FileNotFoundError(f"no Arduino .bin files found in {build_dir}")
 
-    merged = next((path for path in bins if path.name.endswith(".merged.bin")), None)
+    merged = next((path for path in bins if path.name.endswith(".merged.bin") or path.name == COMBINED_BIN), None)
     if merged:
-        copied = copy_file(merged, firmware_dir)
-        return ["0x0", copied], [{"offset": "0x0", "file": copied, "source": merged.name}]
+        copied = copy_combined_file(merged, firmware_dir)
+        return ["0x0", copied], [
+            {
+                "offset": "0x0",
+                "file": copied,
+                "source": merged.name,
+                "segments": [{"offset": "0x0", "source": merged.name, "size": merged.stat().st_size}],
+            }
+        ]
 
-    selected: list[tuple[str, Path]] = []
+    selected: list[tuple[str, Path, str]] = []
     for path in bins:
         name = path.name
         if name.endswith(".bootloader.bin"):
-            selected.append(("0x0", path))
+            selected.append(("0x0", path, name))
         elif name.endswith(".partitions.bin"):
-            selected.append(("0x8000", path))
+            selected.append(("0x8000", path, name))
         elif name == "boot_app0.bin" or name.endswith(".boot_app0.bin"):
-            selected.append(("0xe000", path))
+            selected.append(("0xe000", path, name))
         elif not any(token in name for token in (".bootloader.", ".partitions.", ".merged.")):
-            selected.append(("0x10000", path))
+            selected.append(("0x10000", path, name))
 
     if not selected:
         raise ValueError(f"could not infer Arduino flash layout from {build_dir}")
 
-    entries: list[dict[str, str]] = []
-    command_pairs: list[str] = []
-    for offset, src in sorted(selected, key=lambda item: parse_offset(item[0])):
-        copied = copy_file(src, firmware_dir, offset)
-        entries.append({"offset": offset, "file": copied, "source": src.name})
-        command_pairs.extend([offset, copied])
-    return command_pairs, entries
+    combined_rel = f"bin/{COMBINED_BIN}"
+    source_entries = write_combined_bin(selected, firmware_dir / COMBINED_BIN)
+    return ["0x0", combined_rel], [
+        {
+            "offset": "0x0",
+            "file": combined_rel,
+            "source": "combined Arduino image",
+            "segments": source_entries,
+        }
+    ]
 
 
 def build_esptool_prefix(chip: str, before: str, after: str) -> list[str]:
@@ -173,6 +221,8 @@ cd /d %~dp0
     write_text(
         package_dir / "README.md",
         f"""# {artifact_name}
+
+This archive contains a combined firmware image at `bin/{COMBINED_BIN}`. The helper scripts flash that image at offset `0x0`.
 
 Install esptool if needed:
 
@@ -241,6 +291,7 @@ def package(args: argparse.Namespace) -> Path:
         "git_sha": args.git_sha,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "baud": DEFAULT_BAUD,
+        "combined_bin": f"bin/{COMBINED_BIN}",
         "files": files,
         "flash_command": " ".join("<PORT>" if item == "$PORT" else item for item in command),
     }

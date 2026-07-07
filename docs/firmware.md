@@ -7,12 +7,14 @@ This repository has two firmware artifact sources:
 
 The factory binaries are preserved for product recovery and support workflows. They are not built, repackaged, or re-uploaded by CI.
 
-The CI workflow builds maintained first-party ESP-IDF projects and Arduino sketches, packages the generated binaries with `releases/package_firmware.py`, and uploads flashable `firmware-*` artifacts. Each archive includes:
+The CI workflow builds maintained first-party ESP-IDF projects and Arduino sketches, packages the generated binaries with `releases/package_firmware.py`, and uploads flashable `firmware-*` artifacts. Tag builds also upload those archives to the matching GitHub Release. Each archive includes:
 
 - `manifest.json`
 - `flash.sh`
 - `flash.bat`
 - `flash_args.txt`
-- `bin/` firmware binaries
+- `bin/combined.bin`
 
 Use `releases/download_artifacts.py` to download artifacts from a completed workflow run. Generated archives and downloaded artifacts are ignored by Git.
+
+Each source-built archive is intended to flash the combined image at offset `0x0`. The manifest records the source segments used to create `bin/combined.bin`.

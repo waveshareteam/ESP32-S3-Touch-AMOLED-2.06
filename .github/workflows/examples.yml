@@ -147,3 +147,32 @@ jobs:
           name: firmware-arduino-${{ matrix.name }}-${{ matrix.core }}
           path: release-artifacts/*.zip
           if-no-files-found: error
+  publish-release:
+    permissions:
+      contents: write
+    needs:
+      - build-esp-idf
+      - build-arduino
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download firmware artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: firmware-*
+          path: release-artifacts
+      - name: Publish firmware to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          mapfile -t archives < <(find release-artifacts -name '*.zip' -type f | sort)
+          if [ "${#archives[@]}" -eq 0 ]; then
+            echo "No firmware archives found"
+            exit 1
+          fi
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --title "$TAG" --notes "Source-built firmware archives with combined BIN images."
+          fi
+          gh release upload "$TAG" "${archives[@]}" --clobber
