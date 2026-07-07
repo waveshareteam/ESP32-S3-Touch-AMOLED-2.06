@@ -55,17 +55,6 @@ def esp_idf_roots(repo: Path) -> list[Path]:
     if canonical.is_dir():
         roots.append(canonical)
 
-    examples = repo / "examples"
-    if examples.is_dir():
-        for path in examples.iterdir():
-            normalized_name = path.name.lower().replace("_", "-")
-            if path.is_dir() and normalized_name.startswith("esp-idf"):
-                roots.append(path)
-
-    for firmware_root in ("firmware", "Firmware", "FirmWare"):
-        path = repo / firmware_root
-        if path.is_dir():
-            roots.append(path)
 
     return sorted_unique(roots)
 
@@ -83,23 +72,12 @@ def discover_esp_idf(repo: Path) -> list[dict[str, str]]:
 
 def arduino_roots(repo: Path) -> list[tuple[Path, Path]]:
     roots: list[tuple[Path, Path]] = []
-    examples = repo / "examples"
-    if not examples.is_dir():
-        return roots
-
-    canonical = examples / "arduino"
+    canonical = repo / "examples" / "arduino"
     if canonical.is_dir():
         sketch_root = canonical / "examples" if (canonical / "examples").is_dir() else canonical
         library_root = canonical / "libraries"
         roots.append((sketch_root, library_root if library_root.is_dir() else canonical))
 
-    for path in examples.iterdir():
-        normalized_name = path.name.lower().replace("_", "-")
-        if path.is_dir() and normalized_name.startswith("arduino-"):
-            sketch_root = path / "examples"
-            library_root = path / "libraries"
-            if sketch_root.is_dir():
-                roots.append((sketch_root, library_root if library_root.is_dir() else path))
 
     return sorted_unique_pairs(roots)
 
