@@ -1,0 +1,149 @@
+name: Build Examples
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "v*"
+    paths:
+      - ".github/workflows/examples.yml"
+      - "scripts/discover_examples.py"
+      - "releases/**"
+      - "config/**"
+      - "examples/esp-idf/**"
+      - "examples/arduino/**"
+  pull_request:
+    paths:
+      - ".github/workflows/examples.yml"
+      - "scripts/discover_examples.py"
+      - "releases/**"
+      - "config/**"
+      - "examples/esp-idf/**"
+      - "examples/arduino/**"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "all, an example name, or a repo-relative example path"
+        required: false
+        default: "all"
+
+permissions:
+  contents: read
+
+env:
+  IDF_VERSIONS: "v5.5.4,v6.0.2"
+  IDF_TARGET: "esp32s3"
+  ARDUINO_CORE_VERSION: "3.3.10"
+  ARDUINO_FQBN: "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,PSRAM=opi,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB"
+  PRODUCT_NAME: "ESP32-S3-Touch-AMOLED-2.06"
+
+jobs:
+  discover-esp-idf:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+      count: ${{ steps.discover.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: discover
+        run: |
+          python3 scripts/discover_examples.py \
+            --surface esp-idf \
+            --selector "${{ github.event.inputs.target || 'all' }}" \
+            --idf-versions "${IDF_VERSIONS}" \
+            --github-output "$GITHUB_OUTPUT"
+
+  build-esp-idf:
+    needs: discover-esp-idf
+    if: needs.discover-esp-idf.outputs.count != '0'
+    runs-on: ubuntu-latest
+    container: espressif/idf:${{ matrix.idf }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.discover-esp-idf.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ${{ matrix.path }} with ESP-IDF ${{ matrix.idf }}
+        shell: bash
+        run: |
+          . "$IDF_PATH/export.sh"
+          idf.py --version
+          idf.py -C "${{ matrix.path }}" -B "build/${{ matrix.name }}-${{ matrix.idf }}" set-target "${IDF_TARGET}" build
+      - name: Package firmware
+        shell: bash
+        run: |
+          python3 releases/package_firmware.py \
+            --framework esp-idf \
+            --project "${{ matrix.path }}" \
+            --build-dir "build/${{ matrix.name }}-${{ matrix.idf }}" \
+            --name "${PRODUCT_NAME}-${{ matrix.name }}-${{ matrix.idf }}" \
+            --framework-version "${{ matrix.idf }}" \
+            --target "${IDF_TARGET}" \
+            --git-sha "${{ github.sha }}" \
+            --output-dir release-artifacts
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-esp-idf-${{ matrix.name }}-${{ matrix.idf }}
+          path: release-artifacts/*.zip
+          if-no-files-found: error
+
+  discover-arduino:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+      count: ${{ steps.discover.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: discover
+        run: |
+          python3 scripts/discover_examples.py \
+            --surface arduino \
+            --selector "${{ github.event.inputs.target || 'all' }}" \
+            --arduino-core "${ARDUINO_CORE_VERSION}" \
+            --fqbn "${ARDUINO_FQBN}" \
+            --github-output "$GITHUB_OUTPUT"
+
+  build-arduino:
+    needs: discover-arduino
+    if: needs.discover-arduino.outputs.count != '0'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.discover-arduino.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - name: Install ESP32 Arduino core
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install "esp32:esp32@${{ matrix.core }}"
+      - name: Compile ${{ matrix.path }}
+        run: |
+          arduino-cli compile \
+            --fqbn "${{ matrix.fqbn }}" \
+            --libraries "${{ matrix.libraries }}" \
+            --export-binaries \
+            --output-dir "build/${{ matrix.name }}-${{ matrix.core }}" \
+            "${{ matrix.path }}"
+      - name: Package firmware
+        run: |
+          python3 releases/package_firmware.py \
+            --framework arduino \
+            --project "${{ matrix.path }}" \
+            --build-dir "build/${{ matrix.name }}-${{ matrix.core }}" \
+            --name "${PRODUCT_NAME}-${{ matrix.name }}-arduino-${{ matrix.core }}" \
+            --framework-version "${{ matrix.core }}" \
+            --target "${IDF_TARGET}" \
+            --git-sha "${{ github.sha }}" \
+            --output-dir release-artifacts
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-arduino-${{ matrix.name }}-${{ matrix.core }}
+          path: release-artifacts/*.zip
+          if-no-files-found: error

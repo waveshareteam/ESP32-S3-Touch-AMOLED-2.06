@@ -6,3 +6,5 @@ releases/dist/
 releases/downloads/
 *.zip
 *.tar.gz
+__pycache__/
+*.py[cod]

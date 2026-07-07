@@ -15,6 +15,6 @@ Pull requests should rely on GitHub Actions for build validation. When hardware 
 
 ## Examples
 
-ESP-IDF examples are maintained under `examples/ESP-IDF-v5.4.2/`. Arduino sketches are maintained under `examples/Arduino-v3.2.0/examples/` and use bundled libraries from `examples/Arduino-v3.2.0/libraries/`.
+ESP-IDF examples are maintained under `examples/esp-idf/`. Arduino sketches and bundled libraries are maintained under `examples/arduino/`.
 
 Examples inside bundled libraries are kept as upstream library material and are not part of product CI by default.
