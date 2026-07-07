@@ -20,7 +20,7 @@ GLOBAL_EXAMPLE_PATTERNS = (
     "config/*.defaults",
     "config/**/*.defaults",
 )
-DEFAULT_IDF_VERSIONS = ("v5.5.4", "v6.0.1")
+DEFAULT_IDF_VERSIONS = ("v5.5.4", "v6.0.2")
 
 
 def run_git(args: list[str]) -> list[str]:

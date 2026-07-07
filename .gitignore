@@ -1,0 +1,8 @@
+**/build/
+**/managed_components/
+**/.arduino*/
+release-artifacts/
+releases/dist/
+releases/downloads/
+*.zip
+*.tar.gz

@@ -10,6 +10,16 @@ You can find detailed configuration information on the product wiki page
 
 ---
 
+## Repository Layout
+
+- ESP-IDF examples: `examples/ESP-IDF-v5.4.2/`
+- Arduino sketches: `examples/Arduino-v3.2.0/examples/`
+- Bundled Arduino libraries: `examples/Arduino-v3.2.0/libraries/`
+- Factory firmware: `FirmWare/`
+
+See `docs/repository-structure.md` for the current layout policy and `docs/ci.md` for GitHub Actions build coverage.
+
+---
 ## 🛠️ Contributing
 
 We welcome contributions! Here’s how you can help:
@@ -34,7 +44,7 @@ If you encounter any issues:
 
 ## 📜 License
 
-This repository is licensed under the Apache License License. See the `LICENSE` file for details.
+This repository is licensed under the Apache License 2.0. See the `LICENSE` file for details.
 
 ---
 
