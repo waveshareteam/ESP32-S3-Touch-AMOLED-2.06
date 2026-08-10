@@ -2,26 +2,9 @@ name: Build Examples
 
 on:
   push:
-    branches:
-      - main
-      - master
-    tags:
-      - "v*"
-    paths:
-      - ".github/workflows/examples.yml"
-      - "scripts/discover_examples.py"
-      - "releases/**"
-      - "config/**"
-      - "examples/esp-idf/**"
-      - "examples/arduino/**"
+    branches: [main, master]
+    tags: ["v*"]
   pull_request:
-    paths:
-      - ".github/workflows/examples.yml"
-      - "scripts/discover_examples.py"
-      - "releases/**"
-      - "config/**"
-      - "examples/esp-idf/**"
-      - "examples/arduino/**"
   workflow_dispatch:
     inputs:
       target:
@@ -29,18 +12,82 @@ on:
         required: false
         default: "all"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 permissions:
   contents: read
 
 env:
-  IDF_VERSIONS: "v5.5.4,v6.0.2"
+  IDF_VERSIONS: "v5.5.5,v6.0.2"
   IDF_TARGET: "esp32s3"
-  ARDUINO_CORE_VERSION: "3.3.10"
+  ARDUINO_CORE_VERSION: "3.3.11"
   ARDUINO_FQBN: "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,PSRAM=opi,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB"
   PRODUCT_NAME: "ESP32-S3-Touch-AMOLED-2.06"
 
 jobs:
+  quality:
+    name: Quality and documentation scope
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check repository documentation conventions
+        run: python3 scripts/check_docs.py .
+      - name: Run routing, discovery, and documentation checker tests
+        run: python3 -m unittest discover -s tests -v
+
+  scope:
+    name: Classify changed scope
+    runs-on: ubuntu-latest
+    outputs:
+      esp_idf_mode: ${{ steps.classify.outputs.esp_idf_mode }}
+      arduino_mode: ${{ steps.classify.outputs.arduino_mode }}
+      esp_idf_paths: ${{ steps.classify.outputs.esp_idf_paths }}
+      arduino_paths: ${{ steps.classify.outputs.arduino_paths }}
+      firmware_paths: ${{ steps.classify.outputs.firmware_paths }}
+      unknown_paths: ${{ steps.classify.outputs.unknown_paths }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: classify
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.ref }}" == refs/tags/* ]]; then
+            {
+              echo 'esp_idf_mode=all'
+              echo 'arduino_mode=all'
+              echo 'esp_idf_paths=[]'
+              echo 'arduino_paths=[]'
+              echo 'firmware_paths=[]'
+              echo 'unknown_paths=[]'
+            } >> "$GITHUB_OUTPUT"
+          else
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              base="${{ github.event.pull_request.base.sha }}"
+            else
+              base="${{ github.event.before }}"
+            fi
+            git fetch --no-tags --depth=1 origin "$base"
+            git diff --name-status -z "$base" "${{ github.sha }}" > changed-files.z
+            python3 scripts/ci_scope.py --name-status-file changed-files.z --github-output "$GITHUB_OUTPUT"
+          fi
+          esp_idf_mode="$(grep '^esp_idf_mode=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
+          arduino_mode="$(grep '^arduino_mode=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
+          firmware_paths="$(grep '^firmware_paths=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
+          unknown_paths="$(grep '^unknown_paths=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
+          {
+            echo "### CI scope"
+            echo "- ESP-IDF mode: $esp_idf_mode"
+            echo "- Arduino mode: $arduino_mode"
+            echo "- Firmware paths: $firmware_paths"
+            echo "- Unknown paths: $unknown_paths"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   discover-esp-idf:
+    needs: scope
+    if: needs.scope.outputs.esp_idf_mode != 'none'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.discover.outputs.matrix }}
@@ -48,12 +95,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: discover
+        shell: bash
         run: |
-          python3 scripts/discover_examples.py \
-            --surface esp-idf \
+          args=()
+          if [[ "${{ needs.scope.outputs.esp_idf_mode }}" == "selected" ]]; then
+            args+=(--selected-paths '${{ needs.scope.outputs.esp_idf_paths }}')
+          fi
+          python3 scripts/discover_examples.py --surface esp-idf \
             --selector "${{ github.event.inputs.target || 'all' }}" \
-            --idf-versions "${IDF_VERSIONS}" \
-            --github-output "$GITHUB_OUTPUT"
+            --idf-versions "${IDF_VERSIONS}" --github-output "$GITHUB_OUTPUT" "${args[@]}"
 
   build-esp-idf:
     needs: discover-esp-idf
@@ -74,23 +124,19 @@ jobs:
       - name: Package firmware
         shell: bash
         run: |
-          python3 releases/package_firmware.py \
-            --framework esp-idf \
-            --project "${{ matrix.path }}" \
-            --build-dir "build/${{ matrix.name }}-${{ matrix.idf }}" \
-            --name "${PRODUCT_NAME}-${{ matrix.name }}-${{ matrix.idf }}" \
-            --framework-version "${{ matrix.idf }}" \
-            --target "${IDF_TARGET}" \
-            --git-sha "${{ github.sha }}" \
-            --output-dir release-artifacts
-      - name: Upload firmware artifact
-        uses: actions/upload-artifact@v4
+          python3 releases/package_firmware.py --framework esp-idf --project "${{ matrix.path }}" \
+            --build-dir "build/${{ matrix.name }}-${{ matrix.idf }}" --name "${PRODUCT_NAME}-${{ matrix.name }}-${{ matrix.idf }}" \
+            --framework-version "${{ matrix.idf }}" --target "${IDF_TARGET}" --git-sha "${{ github.sha }}" --output-dir release-artifacts
+      - uses: actions/upload-artifact@v4
         with:
           name: firmware-esp-idf-${{ matrix.name }}-${{ matrix.idf }}
           path: release-artifacts/*.zip
           if-no-files-found: error
+          retention-days: 14
 
   discover-arduino:
+    needs: scope
+    if: needs.scope.outputs.arduino_mode != 'none'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.discover.outputs.matrix }}
@@ -98,13 +144,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: discover
+        shell: bash
         run: |
-          python3 scripts/discover_examples.py \
-            --surface arduino \
+          args=()
+          if [[ "${{ needs.scope.outputs.arduino_mode }}" == "selected" ]]; then
+            args+=(--selected-paths '${{ needs.scope.outputs.arduino_paths }}')
+          fi
+          python3 scripts/discover_examples.py --surface arduino \
             --selector "${{ github.event.inputs.target || 'all' }}" \
-            --arduino-core "${ARDUINO_CORE_VERSION}" \
-            --fqbn "${ARDUINO_FQBN}" \
-            --github-output "$GITHUB_OUTPUT"
+            --arduino-core "${ARDUINO_CORE_VERSION}" --fqbn "${ARDUINO_FQBN}" --github-output "$GITHUB_OUTPUT" "${args[@]}"
 
   build-arduino:
     needs: discover-arduino
@@ -124,40 +172,45 @@ jobs:
           arduino-cli core install "esp32:esp32@${{ matrix.core }}"
       - name: Compile ${{ matrix.path }}
         run: |
-          arduino-cli compile \
-            --fqbn "${{ matrix.fqbn }}" \
-            --libraries "${{ matrix.libraries }}" \
-            --export-binaries \
-            --output-dir "build/${{ matrix.name }}-${{ matrix.core }}" \
-            "${{ matrix.path }}"
+          arduino-cli compile --fqbn "${{ matrix.fqbn }}" --libraries "${{ matrix.libraries }}" \
+            --export-binaries --output-dir "build/${{ matrix.name }}-${{ matrix.core }}" "${{ matrix.path }}"
       - name: Package firmware
         run: |
-          python3 releases/package_firmware.py \
-            --framework arduino \
-            --project "${{ matrix.path }}" \
-            --build-dir "build/${{ matrix.name }}-${{ matrix.core }}" \
-            --name "${PRODUCT_NAME}-${{ matrix.name }}-arduino-${{ matrix.core }}" \
-            --framework-version "${{ matrix.core }}" \
-            --target "${IDF_TARGET}" \
-            --git-sha "${{ github.sha }}" \
-            --output-dir release-artifacts
-      - name: Upload firmware artifact
-        uses: actions/upload-artifact@v4
+          python3 releases/package_firmware.py --framework arduino --project "${{ matrix.path }}" \
+            --build-dir "build/${{ matrix.name }}-${{ matrix.core }}" --name "${PRODUCT_NAME}-${{ matrix.name }}-arduino-${{ matrix.core }}" \
+            --framework-version "${{ matrix.core }}" --target "${IDF_TARGET}" --git-sha "${{ github.sha }}" --output-dir release-artifacts
+      - uses: actions/upload-artifact@v4
         with:
           name: firmware-arduino-${{ matrix.name }}-${{ matrix.core }}
           path: release-artifacts/*.zip
           if-no-files-found: error
+          retention-days: 14
+
+  validation:
+    name: Example validation
+    if: always()
+    needs: [quality, scope, discover-esp-idf, build-esp-idf, discover-arduino, build-arduino]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report stable validation status
+        shell: bash
+        run: |
+          results=("${{ needs.quality.result }}" "${{ needs.scope.result }}" "${{ needs.discover-esp-idf.result }}" "${{ needs.build-esp-idf.result }}" "${{ needs.discover-arduino.result }}" "${{ needs.build-arduino.result }}")
+          printf 'Job results: %s\n' "${results[*]}"
+          for result in "${results[@]}"; do
+            if [[ "$result" == "failure" || "$result" == "cancelled" ]]; then
+              exit 1
+            fi
+          done
+
   publish-release:
     permissions:
       contents: write
-    needs:
-      - build-esp-idf
-      - build-arduino
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [validation, build-esp-idf, build-arduino]
+    if: startsWith(github.ref, 'refs/tags/v') && needs.validation.result == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: Download firmware artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           pattern: firmware-*
           path: release-artifacts

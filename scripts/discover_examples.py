@@ -105,12 +105,25 @@ def discover_arduino(repo: Path) -> list[dict[str, str]]:
 def build_matrix(args: argparse.Namespace) -> dict[str, list[dict[str, str]]]:
     repo = Path(args.repo).resolve()
     selector = normalize(args.selector)
+    selected_paths = None
+    if args.selected_paths:
+        try:
+            value = json.loads(args.selected_paths)
+        except json.JSONDecodeError as exc:
+            raise SystemExit(f"--selected-paths must be JSON: {exc}") from exc
+        if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+            raise SystemExit("--selected-paths must be a JSON array of paths")
+        selected_paths = {normalize(item) for item in value}
     if args.surface == "esp-idf":
         projects = [entry for entry in discover_esp_idf(repo) if selector_matches(entry, selector)]
+        if selected_paths is not None:
+            projects = [entry for entry in projects if normalize(entry["path"]) in selected_paths]
         versions = [item.strip() for item in args.idf_versions.split(",") if item.strip()]
         include = [entry | {"idf": version} for entry in projects for version in versions]
     else:
         sketches = [entry for entry in discover_arduino(repo) if selector_matches(entry, selector)]
+        if selected_paths is not None:
+            sketches = [entry for entry in sketches if normalize(entry["path"]) in selected_paths]
         include = [entry | {"core": args.arduino_core, "fqbn": args.fqbn} for entry in sketches]
     return {"include": include}
 
@@ -120,9 +133,10 @@ def main() -> None:
     parser.add_argument("--repo", default=".")
     parser.add_argument("--surface", choices=("esp-idf", "arduino"), required=True)
     parser.add_argument("--selector", default="all")
-    parser.add_argument("--idf-versions", default="v5.5.4,v6.0.2")
-    parser.add_argument("--arduino-core", default="3.3.10")
+    parser.add_argument("--idf-versions", default="v5.5.5,v6.0.2")
+    parser.add_argument("--arduino-core", default="3.3.11")
     parser.add_argument("--fqbn", default="esp32:esp32:esp32s3")
+    parser.add_argument("--selected-paths", help="exact JSON array of repo-relative paths")
     parser.add_argument("--github-output")
     args = parser.parse_args()
 
