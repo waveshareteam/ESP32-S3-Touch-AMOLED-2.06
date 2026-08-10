@@ -1,0 +1,16 @@
+{
+  "build_override_patterns": [],
+  "documentation_patterns": [],
+  "documentation_asset_patterns": [
+    "Material/images/ESP32-S3-Touch-AMOLED-2.06.jpg"
+  ],
+  "ignore_build_patterns": [],
+  "firmware_patterns": [
+    "FirmWare/**"
+  ],
+  "esp_idf_shared_patterns": [],
+  "arduino_shared_patterns": [],
+  "esp_idf_global_patterns": [],
+  "arduino_global_patterns": [],
+  "global_build_patterns": []
+}

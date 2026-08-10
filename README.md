@@ -14,6 +14,7 @@
     <a href="examples/esp-idf/">🧩 ESP-IDF</a> &middot;
     <a href="examples/arduino/">🔧 Arduino</a>
   </p>
+<p><img src="Material/images/ESP32-S3-Touch-AMOLED-2.06.jpg" alt="ESP32-S3-Touch-AMOLED-2.06 smartwatch development board" width="80%"></p>
 </div>
 
 ---
@@ -30,7 +31,7 @@ the Waveshare ESP32-S3-Touch-AMOLED-2.06.
 | --- | --- |
 | MCU | ESP32-S3 32-bit LX7 dual-core processor |
 | Display | 2.06-inch 410 x 502 QSPI AMOLED using CO5300 |
-| Touch | CST9220 capacitive touch controller using the CST92xx driver |
+| Touch | FT3168 capacitive touch controller using an FT3x68-compatible driver at I2C address `0x38` |
 | Power management | AXP2101 |
 | Motion sensor | QMI8658 six-axis IMU |
 | Audio | Dual digital microphones with ES7210 ADC and ES8311 codec |

@@ -1,0 +1,56 @@
+{
+  "classification_rules": [],
+  "exclude_patterns": [],
+  "pair_exempt_patterns": [],
+  "language_link_exempt_patterns": [],
+  "relative_link_ignore_patterns": [],
+  "docs_only_allowed_patterns": [
+    "Material/images/ESP32-S3-Touch-AMOLED-2.06.jpg"
+  ],
+  "sensitive_allow_regexes": [],
+  "bilingual_pairs": [],
+  "bilingual_directory_mappings": [],
+  "homepage_h3_emoji_allow_patterns": [],
+  "homepage_pairs": [
+    {
+      "english": "README.md",
+      "chinese": "README_ZH.md",
+      "profile": "single-product",
+      "required_components": [
+        "centered_header",
+        "html_h1",
+        "subtitle",
+        "badges",
+        "language_switch",
+        "quick_links",
+        "hero_image",
+        "separator",
+        "h2"
+      ],
+      "required_quick_links": [
+        "product",
+        "documentation",
+        "firmware",
+        "esp_idf",
+        "arduino"
+      ],
+      "required_badges": [
+        "build",
+        "release",
+        "license"
+      ],
+      "required_h2_icons": [
+        "✨",
+        "🖥️",
+        "📦",
+        "🧪",
+        "🛠️",
+        "🗂️",
+        "📚",
+        "🤝",
+        "📄"
+      ],
+      "h3_emoji_allow_patterns": []
+    }
+  ]
+}

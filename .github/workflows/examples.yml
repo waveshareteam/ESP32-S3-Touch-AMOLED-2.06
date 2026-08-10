@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check repository documentation conventions
-        run: python3 scripts/check_docs.py .
+        run: python3 scripts/check_docs.py . --config config/markdown-audit.json
       - name: Run routing, discovery, and documentation checker tests
         run: python3 -m unittest discover -s tests -v
 

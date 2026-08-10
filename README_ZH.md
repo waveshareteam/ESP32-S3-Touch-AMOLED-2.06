@@ -8,12 +8,13 @@
   </p>
   <p><a href="README.md">English</a></p>
   <p>
-    <a href="https://www.waveshare.com/esp32-s3-touch-amoled-2.06.htm">🌐 产品</a> &middot;
+    <a href="https://www.waveshare.net/shop/ESP32-S3-Touch-AMOLED-2.06.htm">🌐 产品</a> &middot;
     <a href="docs/ci_ZH.md">📚 文档</a> &middot;
     <a href="FirmWare/README_ZH.md">📦 固件</a> &middot;
     <a href="examples/esp-idf/">🧩 ESP-IDF</a> &middot;
     <a href="examples/arduino/">🔧 Arduino</a>
   </p>
+<p><img src="Material/images/ESP32-S3-Touch-AMOLED-2.06.jpg" alt="ESP32-S3-Touch-AMOLED-2.06 智能手表开发板" width="80%"></p>
 </div>
 
 ---
@@ -29,7 +30,7 @@ Arduino 示例、源码构建固件包、出厂恢复固件、原理图和产品
 | --- | --- |
 | MCU | ESP32-S3 32 位 LX7 双核处理器 |
 | 显示 | 2.06 英寸 410 x 502 QSPI AMOLED，使用 CO5300 |
-| 触摸 | CST9220 电容触摸控制器，使用 CST92xx 驱动 |
+| 触摸 | FT3168 电容触摸控制器，使用兼容 FT3x68 的驱动，I2C 地址为 `0x38` |
 | 电源管理 | AXP2101 |
 | 运动传感器 | QMI8658 六轴 IMU |
 | 音频 | 双数字麦克风、ES7210 ADC 和 ES8311 编解码器 |

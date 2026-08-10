@@ -29,6 +29,17 @@ The default Arduino matrix uses:
 
 Start the workflow manually with `target=all`, an example directory name such as `01_AXP2101`, or a repo-relative path such as `examples/arduino/01_HelloWorld`.
 
+## Documentation Checks
+
+The lightweight repository checker runs the focused homepage, bilingual-link,
+and local-link checks configured in `config/markdown-audit.json`:
+
+```text
+python3 scripts/check_docs.py . --config config/markdown-audit.json
+```
+
+It is intentionally a limited repository checker, not a complete Markdown audit.
+
 ## Firmware Artifacts
 
 Successful source builds are packaged with `releases/package_firmware.py` and uploaded as `firmware-*` workflow artifacts. Each archive contains a manifest, flash helper scripts, flash arguments, and firmware binaries.

@@ -9,6 +9,16 @@
 工作流发现 `examples/esp-idf/` 下的第一方项目，并在 ESP32-S3 上使用 ESP-IDF
 `v5.5.5` 和 `v6.0.2` 构建。
 
+## 文档检查
+
+轻量级仓库检查器会按 `config/markdown-audit.json` 运行针对主页、双语链接和本地链接的检查：
+
+```text
+python3 scripts/check_docs.py . --config config/markdown-audit.json
+```
+
+该检查器有意保持为范围有限的仓库检查器，并非完整的 Markdown 审核。
+
 ## Arduino
 
 工作流发现 `examples/arduino/` 下的第一方草图，使用 Arduino-ESP32 `3.3.11`、既有
