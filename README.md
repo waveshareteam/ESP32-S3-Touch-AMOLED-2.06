@@ -6,65 +6,57 @@
     <a href="https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-2.06/releases/latest"><img alt="Latest Release" src="https://img.shields.io/github/v/release/waveshareteam/ESP32-S3-Touch-AMOLED-2.06"></a>
     <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/waveshareteam/ESP32-S3-Touch-AMOLED-2.06"></a>
   </p>
+  <p><a href="README_ZH.md">简体中文</a></p>
   <p>
-    <a href="https://www.waveshare.com/esp32-s3-touch-amoled-2.06.htm">Product Page</a> &middot;
-    <a href="https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-2.06/releases/latest">Firmware Releases</a> &middot;
-    <a href="examples/esp-idf/">ESP-IDF Examples</a> &middot;
-    <a href="examples/arduino/">Arduino Examples</a> &middot;
-    <a href="docs/">Documentation</a>
+    <a href="https://www.waveshare.com/esp32-s3-touch-amoled-2.06.htm">🌐 Product</a> &middot;
+    <a href="docs/ci.md">📚 Documentation</a> &middot;
+    <a href="FirmWare/README.md">📦 Firmware</a> &middot;
+    <a href="examples/esp-idf/">🧩 ESP-IDF</a> &middot;
+    <a href="examples/arduino/">🔧 Arduino</a>
   </p>
+<p><img src="Material/images/ESP32-S3-Touch-AMOLED-2.06.jpg" alt="ESP32-S3-Touch-AMOLED-2.06 smartwatch development board" width="80%"></p>
 </div>
 
 ---
 
-## Overview
+## ✨ Overview
 
 This repository provides first-party ESP-IDF and Arduino examples, source-built
-firmware packages, factory recovery firmware, schematics, and product media
-for the Waveshare ESP32-S3-Touch-AMOLED-2.06.
+firmware packages, factory recovery firmware, schematics, and product media for
+the Waveshare ESP32-S3-Touch-AMOLED-2.06.
 
-The board combines an ESP32-S3 with a 410 x 502 AMOLED display, capacitive
-touch, motion sensing, power management, and audio interfaces in a compact
-watch-style development platform.
-
-## Hardware Overview
+## 🖥️ Hardware Overview
 
 | Feature | Device / interface |
 | --- | --- |
 | MCU | ESP32-S3 32-bit LX7 dual-core processor |
 | Display | 2.06-inch 410 x 502 QSPI AMOLED using CO5300 |
-| Touch | CST9220 capacitive touch controller using the CST92xx driver |
+| Touch | FT3168 capacitive touch controller using an FT3x68-compatible driver at I2C address `0x38` |
 | Power management | AXP2101 |
 | Motion sensor | QMI8658 six-axis IMU |
 | Audio | Dual digital microphones with ES7210 ADC and ES8311 codec |
-| Board support | Managed component: `waveshare/esp32_s3_touch_amoled_2_06` |
+| Board support | Managed component `waveshare/esp32_s3_touch_amoled_2_06` |
 | Hardware files | [Schematic](Schematic/) and [product material](Material/) |
 
-## Firmware Releases
+## 📦 Firmware Releases
 
-The fastest way to try an example is to use a ready-to-flash package from the
-[latest release](https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-2.06/releases/latest)
+Use a ready-to-flash package from the [latest release](https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-2.06/releases/latest)
 or a completed `Build Examples` workflow run.
 
-1. Download the `firmware-*` archive for the example and framework version you need.
-2. Extract the archive and install esptool with `python -m pip install esptool`.
+1. Download the `firmware-*` archive for the required example and framework version.
+2. Extract it and install esptool with `python -m pip install esptool`.
 3. Connect the board over USB.
 4. Run `flash.bat COMx` on Windows or `./flash.sh /dev/ttyUSB0` on Linux.
 5. Reset the board if it does not restart automatically.
 
-> [!NOTE]
-> Each package contains a combined firmware image at offset `0x0`, the source
-> segments, flash arguments, helper scripts, and a manifest.
+Each package contains a combined firmware image at offset `0x0`, source
+segments, flash arguments, helper scripts, and a manifest. Factory recovery
+files under [FirmWare](FirmWare/) are separate immutable artifacts; see
+[Firmware Artifacts](docs/firmware.md).
 
-Factory recovery images under [FirmWare](FirmWare/) are separate from
-CI-generated example firmware. See [Firmware Artifacts](docs/firmware.md) for
-the distinction between the two sources.
+## 🧪 Examples
 
-## Examples
-
-### ESP-IDF
-
-| Example | Focus |
+| ESP-IDF example | Focus |
 | --- | --- |
 | [01_AXP2101](examples/esp-idf/01_AXP2101/) | Power management and battery telemetry |
 | [02_lvgl_demo_v9](examples/esp-idf/02_lvgl_demo_v9/) | LVGL 9 display and touch demo |
@@ -73,9 +65,7 @@ the distinction between the two sources.
 | [05_Spec_Analyzer](examples/esp-idf/05_Spec_Analyzer/) | Microphone spectrum analyzer |
 | [06_videoplayer](examples/esp-idf/06_videoplayer/) | SD card video playback with audio |
 
-### Arduino
-
-| Example | Focus |
+| Arduino example | Focus |
 | --- | --- |
 | [01_HelloWorld](examples/arduino/01_HelloWorld/) | Display bring-up |
 | [02_GFX_AsciiTable](examples/arduino/02_GFX_AsciiTable/) | GFX text and character rendering |
@@ -86,25 +76,22 @@ the distinction between the two sources.
 | [07_LVGL_SD_Test](examples/arduino/07_LVGL_SD_Test/) | SD card test |
 | [08_ES8311](examples/arduino/08_ES8311/) | ES8311 audio codec example |
 
-Bundled Arduino libraries live under
-[`examples/arduino/libraries`](examples/arduino/libraries/). Their upstream
-library examples are intentionally excluded from the product CI matrix.
+Bundled libraries in [`examples/arduino/libraries/`](examples/arduino/libraries/)
+are used by product sketches; their upstream examples are excluded from product CI.
 
-## Supported Toolchains
+## 🛠️ Supported Toolchains
 
 | Surface | Version |
 | --- | --- |
-| ESP-IDF | `v5.5.4` |
-| ESP-IDF | `v6.0.2` |
-| Arduino-ESP32 | `3.3.10` |
+| ESP-IDF | `v5.5.5` and `v6.0.2` |
+| Arduino-ESP32 | `3.3.11` |
 
 The [Build Examples workflow](https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-2.06/actions/workflows/examples.yml)
-discovers and builds maintained first-party ESP-IDF projects and Arduino
-sketches, then packages successful builds as flashable firmware artifacts. See
-[Continuous Integration](docs/ci.md) for the build matrix, dispatch inputs,
-and artifact behavior.
+discovers maintained first-party projects, packages successful builds, and
+accepts `target=all`, an example name, or an example path for manual runs. See
+[Continuous Integration](docs/ci.md) for routing and matrix details.
 
-## Repository Layout
+## 🗂️ Repository Layout
 
 | Path | Purpose |
 | --- | --- |
@@ -117,24 +104,24 @@ and artifact behavior.
 | [`scripts/`](scripts/) | Example discovery and CI helper scripts |
 | [`docs/`](docs/) | Repository, CI, and firmware notes |
 
-## Documentation
+## 📚 Documentation
 
 - [Repository Structure](docs/repository-structure.md)
 - [Continuous Integration](docs/ci.md)
 - [Firmware Artifacts](docs/firmware.md)
 - [Release Tools](releases/README.md)
 
-## Support and Contributions
+## 🤝 Support and Contributions
 
 Contributions and reproducible issue reports are welcome. Include the example
-path, framework version, reproduction steps, expected behavior, actual behavior,
-and relevant serial logs.
+path, framework version, reproduction steps, expected behavior, actual
+behavior, and relevant serial logs.
 
 - [Contributing Guide](CONTRIBUTING.md)
 - [Support](SUPPORT.md)
 - [Security Policy](SECURITY.md)
 - [Open an Issue](https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-2.06/issues/new/choose)
 
-## License
+## 📄 License
 
 This repository is licensed under the Apache License 2.0. See [LICENSE](LICENSE).

@@ -7,7 +7,8 @@ dependencies:
     version: '>=5.3.2'
 
   waveshare/esp32_s3_touch_amoled_2_06:
-    version: "*"
+    # v2 is the current board BSP line; review a future major with both IDF lines and hardware.
+    version: "^2.0.0"
 
   chmorgan/esp-audio-player:
     version: "1.1.*"

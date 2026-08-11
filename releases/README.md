@@ -1,5 +1,7 @@
 # Release Scripts
 
+[简体中文](README_ZH.md)
+
 This directory contains helper scripts for packaging build outputs into flashable firmware archives.
 
 ## ESP-IDF
@@ -27,14 +29,14 @@ arduino-cli compile \
   --fqbn esp32:esp32:esp32s3 \
   --libraries examples/arduino/libraries \
   --export-binaries \
-  --output-dir build/01_HelloWorld-3.3.10 \
+  --output-dir build/01_HelloWorld-3.3.11 \
   examples/arduino/01_HelloWorld
 
 python3 releases/package_firmware.py \
   --framework arduino \
   --project examples/arduino/01_HelloWorld \
-  --build-dir build/01_HelloWorld-3.3.10 \
-  --framework-version 3.3.10 \
+  --build-dir build/01_HelloWorld-3.3.11 \
+  --framework-version 3.3.11 \
   --target esp32s3
 ```
 

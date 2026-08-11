@@ -1,4 +1,6 @@
 ---
+
+[简体中文](bug_report_ZH.md)
 name: Bug report
 about: Report a reproducible problem with a board example
 title: "[Bug] "

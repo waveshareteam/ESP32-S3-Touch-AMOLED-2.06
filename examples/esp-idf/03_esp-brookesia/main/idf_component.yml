@@ -4,4 +4,5 @@ dependencies:
     version: "^1.4.1"
   lvgl/lvgl:
     version: "9.5.0"
-  waveshare/esp32_s3_touch_amoled_2_06: "*"
+  # v2 is the current board BSP line; review a future major with both IDF lines and hardware.
+  waveshare/esp32_s3_touch_amoled_2_06: "^2.0.0"

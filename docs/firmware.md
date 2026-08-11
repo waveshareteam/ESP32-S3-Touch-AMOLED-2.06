@@ -1,5 +1,7 @@
 # Firmware Artifacts
 
+[简体中文](firmware_ZH.md)
+
 This repository has two firmware artifact sources:
 
 - Checked-in factory or recovery binaries under `FirmWare/`
