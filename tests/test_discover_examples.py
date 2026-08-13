@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -35,3 +37,16 @@ class DiscoveryTests(unittest.TestCase):
         self.assertIn("v5.5.5", Path(discover_examples.__file__).read_text(encoding="utf-8"))
         self.assertIn('default="3.3.11"', Path(discover_examples.__file__).read_text(encoding="utf-8"))
 
+    def test_cli_accepts_selected_json_paths_with_single_quotes(self) -> None:
+        project = "examples/esp-idf/idf'quoted"
+        (self.repo / project / "main").mkdir(parents=True)
+        (self.repo / project / "CMakeLists.txt").write_text("project(test)")
+        result = subprocess.run(
+            [
+                sys.executable, str(Path(discover_examples.__file__)), "--repo", str(self.repo),
+                "--surface", "esp-idf", "--idf-versions", "v5.5.5", "--selected-paths", json.dumps([project]),
+            ],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual([project], [item["path"] for item in json.loads(result.stdout)["include"]])

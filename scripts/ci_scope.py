@@ -11,7 +11,23 @@ import argparse
 import json
 import sys
 from dataclasses import dataclass, field
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
+
+
+AUDIT_CONFIG_KEYS = {
+    "classification_rules",
+    "exclude_patterns",
+    "pair_exempt_patterns",
+    "language_link_exempt_patterns",
+    "relative_link_ignore_patterns",
+    "docs_only_allowed_patterns",
+    "sensitive_allow_regexes",
+    "bilingual_pairs",
+    "bilingual_directory_mappings",
+    "homepage_h3_emoji_allow_patterns",
+    "homepage_pairs",
+}
+DOCUMENTATION_ASSET_SUFFIXES = {".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"}
 
 
 @dataclass
@@ -22,6 +38,7 @@ class Scope:
     arduino_all: bool = False
     firmware: list[str] = field(default_factory=list)
     unknown: list[str] = field(default_factory=list)
+    docs_only: bool = True
 
     def mark_all(self) -> None:
         self.esp_all = True
@@ -30,6 +47,44 @@ class Scope:
 
 def normalize(path: str) -> str:
     return path.replace("\\", "/").strip("/")
+
+
+def load_docs_only_asset_paths(path: Path | None) -> tuple[str, ...]:
+    """Load explicit documentation assets allowed beside Markdown files."""
+    if path is None:
+        return ()
+    try:
+        config = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"cannot read JSON config {path}: {exc}") from exc
+    if not isinstance(config, dict):
+        raise ValueError("config root must be a JSON object")
+    unknown = sorted(set(config) - AUDIT_CONFIG_KEYS)
+    if unknown:
+        raise ValueError("unknown config keys: " + ", ".join(unknown))
+    paths = config.get("docs_only_allowed_patterns", [])
+    if not isinstance(paths, list) or not all(isinstance(item, str) for item in paths):
+        raise ValueError("config docs_only_allowed_patterns must be a list of strings")
+    safe_paths: list[str] = []
+    for item in paths:
+        normalized = item.replace("\\", "/")
+        parts = PurePosixPath(normalized).parts
+        if (
+            not normalized
+            or item != normalized
+            or normalized.startswith("/")
+            or ".." in parts
+            or normalized.endswith("/")
+            or "//" in normalized
+            or (len(normalized) >= 2 and normalized[1] == ":")
+            or any(character in normalized for character in "*?[]")
+            or PurePosixPath(normalized).suffix.lower() not in DOCUMENTATION_ASSET_SUFFIXES
+        ):
+            raise ValueError(
+                "docs_only_allowed_patterns entries must be explicit repository-relative documentation asset files"
+            )
+        safe_paths.append(normalized)
+    return tuple(safe_paths)
 
 
 def parse_name_status(data: bytes) -> list[str]:
@@ -50,6 +105,8 @@ def parse_name_status(data: bytes) -> list[str]:
         if not paths:
             raise ValueError("no changed paths")
         return paths
+    if not data.endswith(b"\0"):
+        raise ValueError("truncated NUL-delimited changed-file data")
     fields = [item.decode("utf-8", "surrogateescape") for item in data.split(b"\0") if item]
     paths: list[str] = []
     index = 0
@@ -89,10 +146,12 @@ def project_for(path: str, surface: str) -> str | None:
     return "/".join(parts[:3])
 
 
-def classify(paths: list[str]) -> Scope:
+def classify(paths: list[str], docs_only_asset_paths: tuple[str, ...] = ()) -> Scope:
     scope = Scope()
     for path in paths:
         lower = path.lower()
+        if not (lower.endswith(".md") or path in docs_only_asset_paths):
+            scope.docs_only = False
         if path.startswith("FirmWare/"):
             scope.firmware.append(path)
             continue
@@ -137,16 +196,20 @@ def payload(scope: Scope) -> dict[str, str]:
         "arduino_paths": json.dumps(sorted(scope.arduino), separators=(",", ":")),
         "firmware_paths": json.dumps(sorted(scope.firmware), separators=(",", ":")),
         "unknown_paths": json.dumps(sorted(scope.unknown), separators=(",", ":")),
+        "docs_only": str(scope.docs_only).lower(),
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, help="Markdown audit config with docs-only asset allowlist")
     parser.add_argument("--name-status-file", type=argparse.FileType("rb"), default=sys.stdin.buffer)
     parser.add_argument("--github-output", type=argparse.FileType("a", encoding="utf-8"))
     args = parser.parse_args()
     try:
-        result = payload(classify(parse_name_status(args.name_status_file.read())))
+        result = payload(classify(
+            parse_name_status(args.name_status_file.read()), load_docs_only_asset_paths(args.config)
+        ))
     except ValueError as exc:
         print(f"ci_scope: {exc}", file=sys.stderr)
         return 2

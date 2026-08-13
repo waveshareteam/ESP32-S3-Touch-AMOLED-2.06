@@ -32,9 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check repository documentation conventions
+      - name: Check established documentation compatibility rules
         run: python3 scripts/check_docs.py . --config config/markdown-audit.json
-      - name: Run routing, discovery, and documentation checker tests
+      - name: Run routing, discovery, and Markdown audit tests
         run: python3 -m unittest discover -s tests -v
 
   scope:
@@ -47,10 +47,11 @@ jobs:
       arduino_paths: ${{ steps.classify.outputs.arduino_paths }}
       firmware_paths: ${{ steps.classify.outputs.firmware_paths }}
       unknown_paths: ${{ steps.classify.outputs.unknown_paths }}
+      docs_only: ${{ steps.classify.outputs.docs_only }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - id: classify
         shell: bash
         run: |
@@ -62,27 +63,47 @@ jobs:
               echo 'arduino_paths=[]'
               echo 'firmware_paths=[]'
               echo 'unknown_paths=[]'
+              echo 'docs_only=false'
             } >> "$GITHUB_OUTPUT"
+            python3 scripts/audit_markdown.py . --all --config config/markdown-audit.json
           else
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               base="${{ github.event.pull_request.base.sha }}"
             else
               base="${{ github.event.before }}"
             fi
-            git fetch --no-tags --depth=1 origin "$base"
-            git diff --name-status -z "$base" "${{ github.sha }}" > changed-files.z
-            python3 scripts/ci_scope.py --name-status-file changed-files.z --github-output "$GITHUB_OUTPUT"
+            if [[ -z "$base" || "$base" == "0000000000000000000000000000000000000000" ]]; then
+              echo "A non-empty base SHA is required for changed-scope CI" >&2
+              exit 1
+            fi
+            git fetch --no-tags origin "$base"
+            git cat-file -e "$base^{commit}"
+            git diff --name-status -z --find-renames "$base" "${{ github.sha }}" > changed-files.z
+            git diff --name-status --find-renames "$base" "${{ github.sha }}" > changed-files.txt
+            if [[ ! -s changed-files.z || ! -s changed-files.txt ]]; then
+              echo "Changed-file diff is missing or empty" >&2
+              exit 1
+            fi
+            python3 scripts/ci_scope.py --config config/markdown-audit.json --name-status-file changed-files.z --github-output "$GITHUB_OUTPUT"
+            docs_only="$(grep '^docs_only=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
+            audit_args=(. --changed-files-from changed-files.txt --config config/markdown-audit.json)
+            if [[ "$docs_only" == "true" ]]; then
+              audit_args+=(--expect-docs-only)
+            fi
+            python3 scripts/audit_markdown.py "${audit_args[@]}"
           fi
           esp_idf_mode="$(grep '^esp_idf_mode=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
           arduino_mode="$(grep '^arduino_mode=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
           firmware_paths="$(grep '^firmware_paths=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
           unknown_paths="$(grep '^unknown_paths=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
+          docs_only="$(grep '^docs_only=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
           {
             echo "### CI scope"
             echo "- ESP-IDF mode: $esp_idf_mode"
             echo "- Arduino mode: $arduino_mode"
             echo "- Firmware paths: $firmware_paths"
             echo "- Unknown paths: $unknown_paths"
+            echo "- Documentation-only: $docs_only"
           } >> "$GITHUB_STEP_SUMMARY"
 
   discover-esp-idf:
@@ -95,11 +116,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: discover
+        env:
+          SELECTED_PATHS: ${{ needs.scope.outputs.esp_idf_paths }}
         shell: bash
         run: |
           args=()
           if [[ "${{ needs.scope.outputs.esp_idf_mode }}" == "selected" ]]; then
-            args+=(--selected-paths '${{ needs.scope.outputs.esp_idf_paths }}')
+            args+=(--selected-paths "$SELECTED_PATHS")
           fi
           python3 scripts/discover_examples.py --surface esp-idf \
             --selector "${{ github.event.inputs.target || 'all' }}" \
@@ -144,11 +167,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: discover
+        env:
+          SELECTED_PATHS: ${{ needs.scope.outputs.arduino_paths }}
         shell: bash
         run: |
           args=()
           if [[ "${{ needs.scope.outputs.arduino_mode }}" == "selected" ]]; then
-            args+=(--selected-paths '${{ needs.scope.outputs.arduino_paths }}')
+            args+=(--selected-paths "$SELECTED_PATHS")
           fi
           python3 scripts/discover_examples.py --surface arduino \
             --selector "${{ github.event.inputs.target || 'all' }}" \
