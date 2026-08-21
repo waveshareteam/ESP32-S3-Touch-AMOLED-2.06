@@ -11,13 +11,23 @@
 
 ## 文档检查
 
-轻量级仓库检查器会按 `config/markdown-audit.json` 运行针对主页、双语链接和本地链接的检查：
+完整、自包含的 Markdown 审核使用 `config/markdown-audit.json` 检查所有权、双语配对和互链、
+本地及 HTML 链接/片段、主页结构和公开文本隐私。PR 和 push 的变更范围使用完整的重命名感知输入：
+
+```text
+python3 scripts/audit_markdown.py . --changed-files-from changed-files.txt --config config/markdown-audit.json
+```
+
+当路由分类器确认每个旧路径和新路径均为 Markdown 或精确列入允许列表的文档资源文件时，CI 还会添加
+`--expect-docs-only`。缺失、为空、格式错误或不可用的变更文件数据会使范围作业失败，不会静默通过或选择全部构建。
+
+旧版轻量检查器仍保留，用于兼容其针对主页、双语链接和本地链接的约定：
 
 ```text
 python3 scripts/check_docs.py . --config config/markdown-audit.json
 ```
 
-该检查器有意保持为范围有限的仓库检查器，并非完整的 Markdown 审核。
+该检查器有意保持为范围有限的仓库检查器，不能替代完整审核。
 
 ## Arduino
 

@@ -2,7 +2,7 @@
 
 [简体中文](pull_request_template_ZH.md)
 
-- TODO
+<!-- Describe the intent and user-visible outcome of this change. -->
 
 ## Validation
 
@@ -21,4 +21,4 @@
 
 ## Notes
 
-- TODO
+<!-- Include context that reviewers need, such as migration, compatibility, or follow-up notes. -->

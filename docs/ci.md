@@ -31,14 +31,28 @@ Start the workflow manually with `target=all`, an example directory name such as
 
 ## Documentation Checks
 
-The lightweight repository checker runs the focused homepage, bilingual-link,
-and local-link checks configured in `config/markdown-audit.json`:
+The complete self-contained Markdown audit uses `config/markdown-audit.json`
+for ownership, bilingual pairing and reciprocal language links, local and HTML
+links/fragments, homepage structure, and public-text privacy checks. Changed
+PR and push scopes run it with the complete rename-aware input:
+
+```text
+python3 scripts/audit_markdown.py . --changed-files-from changed-files.txt --config config/markdown-audit.json
+```
+
+When the route classifier confirms every old and new affected path is Markdown
+or an exact allowlisted documentation asset file, CI also adds
+`--expect-docs-only`. Missing, empty, malformed, or unavailable changed-file
+data fails the scope job rather than silently passing or selecting all builds.
+
+The legacy checker remains for compatibility with its focused homepage,
+bilingual-link, and local-link conventions:
 
 ```text
 python3 scripts/check_docs.py . --config config/markdown-audit.json
 ```
 
-It is intentionally a limited repository checker, not a complete Markdown audit.
+It is intentionally limited and does not replace the complete audit.
 
 ## Firmware Artifacts
 
