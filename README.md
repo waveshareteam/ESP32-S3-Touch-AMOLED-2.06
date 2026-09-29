@@ -75,6 +75,7 @@ files under [FirmWare](FirmWare/) are separate immutable artifacts; see
 | [06_LVGL_Arduino_v9](examples/arduino/06_LVGL_Arduino_v9/) | LVGL 9 UI demo |
 | [07_LVGL_SD_Test](examples/arduino/07_LVGL_SD_Test/) | SD card test |
 | [08_ES8311](examples/arduino/08_ES8311/) | ES8311 audio codec example |
+| [09_LVGL_App_Launcher](examples/arduino/09_LVGL_App_Launcher/) | Modular watch-face launcher with Settings and HTTPS OTA (A/B slots, per-module data partitions) |
 
 Bundled libraries in [`examples/arduino/libraries/`](examples/arduino/libraries/)
 are used by product sketches; their upstream examples are excluded from product CI.

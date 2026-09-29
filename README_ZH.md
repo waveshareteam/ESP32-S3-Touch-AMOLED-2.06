@@ -73,6 +73,7 @@ Arduino 示例、源码构建固件包、出厂恢复固件、原理图和产品
 | [06_LVGL_Arduino_v9](examples/arduino/06_LVGL_Arduino_v9/) | LVGL 9 界面演示 |
 | [07_LVGL_SD_Test](examples/arduino/07_LVGL_SD_Test/) | SD 卡测试 |
 | [08_ES8311](examples/arduino/08_ES8311/) | ES8311 音频编解码器示例 |
+| [09_LVGL_App_Launcher](examples/arduino/09_LVGL_App_Launcher/) | 模块化表盘启动器，含设置与 HTTPS OTA（A/B 固件槽、各模块独立数据分区） |
 
 [`examples/arduino/libraries/`](examples/arduino/libraries/) 中的随附库由产品草图使用；
 其中的上游示例不属于产品 CI。
