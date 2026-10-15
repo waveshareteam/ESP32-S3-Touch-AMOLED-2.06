@@ -8,5 +8,6 @@
   "arduino": {
     "core": "3.3.11",
     "fqbn": "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,PSRAM=opi,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB"
-  }
+  },
+  "factory_firmware": { "esp_idf": "v5.5.5" }
 }
