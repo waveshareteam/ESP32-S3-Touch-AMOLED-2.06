@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-get_filename_component(REPOSITORY_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+get_filename_component(REPOSITORY_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 file(TO_CMAKE_PATH "${REPOSITORY_ROOT}" REPOSITORY_ROOT)
 add_compile_options(
     "-ffile-prefix-map=${REPOSITORY_ROOT}=."
