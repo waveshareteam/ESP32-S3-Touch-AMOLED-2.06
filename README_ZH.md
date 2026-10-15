@@ -35,7 +35,7 @@ Arduino 示例、源码构建固件包、出厂恢复固件、原理图和产品
 | 运动传感器 | QMI8658 六轴 IMU |
 | 音频 | 双数字麦克风、ES7210 ADC 和 ES8311 编解码器 |
 | 板级支持 | 托管组件 `waveshare/esp32_s3_touch_amoled_2_06` |
-| 硬件文件 | [原理图](Schematic/)和[产品资料](Material/) |
+| 硬件文件 | [原理图](hardware/)和[产品资料](Material/) |
 
 ## 📦 固件发布
 
@@ -66,14 +66,14 @@ Arduino 示例、源码构建固件包、出厂恢复固件、原理图和产品
 
 | Arduino 示例 | 重点 |
 | --- | --- |
-| [01_HelloWorld](examples/arduino/01_HelloWorld/) | 显示初始化 |
-| [02_GFX_AsciiTable](examples/arduino/02_GFX_AsciiTable/) | GFX 文本和字符渲染 |
-| [03_LVGL_PCF85063_simpleTime](examples/arduino/03_LVGL_PCF85063_simpleTime/) | 使用 PCF85063 RTC 的 LVGL 时钟界面 |
-| [04_LVGL_QMI8658_ui](examples/arduino/04_LVGL_QMI8658_ui/) | LVGL IMU 数据界面 |
-| [05_LVGL_AXP2101_ADC_Data](examples/arduino/05_LVGL_AXP2101_ADC_Data/) | LVGL 电源和电池遥测界面 |
-| [06_LVGL_Arduino_v9](examples/arduino/06_LVGL_Arduino_v9/) | LVGL 9 界面演示 |
-| [07_LVGL_SD_Test](examples/arduino/07_LVGL_SD_Test/) | SD 卡测试 |
-| [08_ES8311](examples/arduino/08_ES8311/) | ES8311 音频编解码器示例 |
+| [01_HelloWorld](examples/arduino/examples/01_HelloWorld/) | 显示初始化 |
+| [02_GFX_AsciiTable](examples/arduino/examples/02_GFX_AsciiTable/) | GFX 文本和字符渲染 |
+| [03_LVGL_PCF85063_simpleTime](examples/arduino/examples/03_LVGL_PCF85063_simpleTime/) | 使用 PCF85063 RTC 的 LVGL 时钟界面 |
+| [04_LVGL_QMI8658_ui](examples/arduino/examples/04_LVGL_QMI8658_ui/) | LVGL IMU 数据界面 |
+| [05_LVGL_AXP2101_ADC_Data](examples/arduino/examples/05_LVGL_AXP2101_ADC_Data/) | LVGL 电源和电池遥测界面 |
+| [06_LVGL_Arduino_v9](examples/arduino/examples/06_LVGL_Arduino_v9/) | LVGL 9 界面演示 |
+| [07_LVGL_SD_Test](examples/arduino/examples/07_LVGL_SD_Test/) | SD 卡测试 |
+| [08_ES8311](examples/arduino/examples/08_ES8311/) | ES8311 音频编解码器示例 |
 
 [`examples/arduino/libraries/`](examples/arduino/libraries/) 中的随附库由产品草图使用；
 其中的上游示例不属于产品 CI。
@@ -97,7 +97,7 @@ Arduino 示例、源码构建固件包、出厂恢复固件、原理图和产品
 | [`examples/arduino/`](examples/arduino/) | 第一方 Arduino 草图和随附库 |
 | [`FirmWare/`](FirmWare/) | 已提交的出厂和恢复二进制文件 |
 | [`Material/`](Material/) | 产品媒体和参考资料 |
-| [`Schematic/`](Schematic/) | 原理图文件 |
+| [`hardware/`](hardware/) | 原理图文件 |
 | [`releases/`](releases/) | 固件打包和工件下载工具 |
 | [`scripts/`](scripts/) | 示例发现和 CI 辅助脚本 |
 | [`docs/`](docs/) | 仓库、CI 和固件说明 |

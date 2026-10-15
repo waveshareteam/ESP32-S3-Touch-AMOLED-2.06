@@ -36,7 +36,7 @@ the Waveshare ESP32-S3-Touch-AMOLED-2.06.
 | Motion sensor | QMI8658 six-axis IMU |
 | Audio | Dual digital microphones with ES7210 ADC and ES8311 codec |
 | Board support | Managed component `waveshare/esp32_s3_touch_amoled_2_06` |
-| Hardware files | [Schematic](Schematic/) and [product material](Material/) |
+| Hardware files | [Schematic](hardware/) and [product material](Material/) |
 
 ## 📦 Firmware Releases
 
@@ -68,14 +68,14 @@ files under [FirmWare](FirmWare/) are separate immutable artifacts; see
 
 | Arduino example | Focus |
 | --- | --- |
-| [01_HelloWorld](examples/arduino/01_HelloWorld/) | Display bring-up |
-| [02_GFX_AsciiTable](examples/arduino/02_GFX_AsciiTable/) | GFX text and character rendering |
-| [03_LVGL_PCF85063_simpleTime](examples/arduino/03_LVGL_PCF85063_simpleTime/) | LVGL clock UI using the PCF85063 RTC |
-| [04_LVGL_QMI8658_ui](examples/arduino/04_LVGL_QMI8658_ui/) | LVGL IMU data UI |
-| [05_LVGL_AXP2101_ADC_Data](examples/arduino/05_LVGL_AXP2101_ADC_Data/) | LVGL power and battery telemetry UI |
-| [06_LVGL_Arduino_v9](examples/arduino/06_LVGL_Arduino_v9/) | LVGL 9 UI demo |
-| [07_LVGL_SD_Test](examples/arduino/07_LVGL_SD_Test/) | SD card test |
-| [08_ES8311](examples/arduino/08_ES8311/) | ES8311 audio codec example |
+| [01_HelloWorld](examples/arduino/examples/01_HelloWorld/) | Display bring-up |
+| [02_GFX_AsciiTable](examples/arduino/examples/02_GFX_AsciiTable/) | GFX text and character rendering |
+| [03_LVGL_PCF85063_simpleTime](examples/arduino/examples/03_LVGL_PCF85063_simpleTime/) | LVGL clock UI using the PCF85063 RTC |
+| [04_LVGL_QMI8658_ui](examples/arduino/examples/04_LVGL_QMI8658_ui/) | LVGL IMU data UI |
+| [05_LVGL_AXP2101_ADC_Data](examples/arduino/examples/05_LVGL_AXP2101_ADC_Data/) | LVGL power and battery telemetry UI |
+| [06_LVGL_Arduino_v9](examples/arduino/examples/06_LVGL_Arduino_v9/) | LVGL 9 UI demo |
+| [07_LVGL_SD_Test](examples/arduino/examples/07_LVGL_SD_Test/) | SD card test |
+| [08_ES8311](examples/arduino/examples/08_ES8311/) | ES8311 audio codec example |
 
 Bundled libraries in [`examples/arduino/libraries/`](examples/arduino/libraries/)
 are used by product sketches; their upstream examples are excluded from product CI.
@@ -100,7 +100,7 @@ accepts `target=all`, an example name, or an example path for manual runs. See
 | [`examples/arduino/`](examples/arduino/) | First-party Arduino sketches and bundled libraries |
 | [`FirmWare/`](FirmWare/) | Checked-in factory and recovery binaries |
 | [`Material/`](Material/) | Product media and reference material |
-| [`Schematic/`](Schematic/) | Schematic files |
+| [`hardware/`](hardware/) | Schematic files |
 | [`releases/`](releases/) | Firmware packaging and artifact download tools |
 | [`scripts/`](scripts/) | Example discovery and CI helper scripts |
 | [`docs/`](docs/) | Repository, CI, and firmware notes |
