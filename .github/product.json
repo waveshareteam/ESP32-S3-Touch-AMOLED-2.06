@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/waveshareteam/esp32-repo-template/v1/schema/product.schema.json",
+  "product": "ESP32-S3-Touch-AMOLED-2.06",
+  "product_url": "https://www.waveshare.com/esp32-s3-touch-amoled-2.06.htm",
+  "tier": 1,
+  "target": "esp32s3",
+  "esp_idf": { "versions": ["v5.5.5", "v6.0.2"] },
+  "arduino": {
+    "core": "3.3.11",
+    "fqbn": "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,PSRAM=opi,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB"
+  }
+}

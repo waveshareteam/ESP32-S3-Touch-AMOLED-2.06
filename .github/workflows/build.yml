@@ -1,0 +1,19 @@
+name: Build
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      examples:
+        description: all, an example directory name, or a repo-relative path
+        default: all
+jobs:
+  build:
+    uses: waveshareteam/esp32-repo-template/.github/workflows/build.yml@v1
+    with:
+      examples: ${{ inputs.examples || 'all' }}
+    permissions:
+      contents: write
+    secrets: inherit
