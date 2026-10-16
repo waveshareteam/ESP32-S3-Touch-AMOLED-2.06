@@ -87,12 +87,12 @@ ESP32-S3-Touch-AMOLED-2.06 是一块手表形态的开发板，在 ESP32-S3 上�
 
 - [原理图](hardware/)
 - [产品页面](https://www.waveshare.com/esp32-s3-touch-amoled-2.06.htm)
-- [Wiki](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-2.06)
+- [Wiki](https://docs.waveshare.net/ESP32-S3-Touch-AMOLED-2.06/)
 
 ## 🤝 支持
 
-- 示例或仓库问题：[提交 issue](https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-2.06/issues/new/choose)。
-- 产品使用、硬件或订单问题：[微雪技术支持](https://service.waveshare.com/)。
+- 示例或仓库问题：[提交 issue](https://gitee.com/waveshare/ESP32-S3-Touch-AMOLED-2.06/issues)。
+- 产品使用、硬件或订单问题：[微雪技术支持](https://docs.waveshare.net/ESP32-S3-Touch-AMOLED-2.06/Technical-Support/)。
 
 ## 📄 许可证
 
