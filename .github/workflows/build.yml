@@ -11,10 +11,9 @@ on:
         default: all
 jobs:
   build:
-    uses: waveshareteam/esp32-repo-template/.github/workflows/build.yml@feat/factory-firmware
+    uses: waveshareteam/esp32-repo-template/.github/workflows/build.yml@v1
     with:
       examples: ${{ inputs.examples || 'all' }}
-      template_ref: feat/factory-firmware
     permissions:
       contents: write
     secrets: inherit
