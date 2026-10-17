@@ -29,6 +29,7 @@ firmware, the factory firmware source, and the schematic.
 | Feature | Device / interface |
 | --- | --- |
 | MCU | ESP32-S3 |
+| Memory | 32 MB Flash, 8 MB PSRAM |
 | Display | 2.06-inch 410 x 502 QSPI AMOLED using CO5300 |
 | Touch | FT3168 capacitive touch controller over I2C |
 | Power management | AXP2101 |
