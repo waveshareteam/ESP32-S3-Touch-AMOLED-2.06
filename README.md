@@ -88,7 +88,7 @@ Libraries used by the sketches are bundled in [`examples/arduino/libraries`](exa
 
 ## 📚 Resources
 
-- [Schematic](hardware/)
+- [Schematic](hardware/schematic/)
 - [Product page](https://www.waveshare.com/esp32-s3-touch-amoled-2.06.htm)
 - [Wiki](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-2.06)
 
