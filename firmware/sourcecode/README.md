@@ -8,7 +8,7 @@ application launcher with its built-in apps.
 CI builds it with the ESP-IDF version set in `.github/product.json`. The tested,
 ready-to-flash image is in the parent [`firmware`](../) folder.
 
-To build it locally with that ESP-IDF version:
+To build it locally with that ESP-IDF version, run from the repository root:
 
 ```bash
 idf.py -C firmware/sourcecode set-target esp32s3 build

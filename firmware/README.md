@@ -13,7 +13,7 @@ Flash with esptool:
 ```bash
 python -m pip install esptool
 esptool.py --chip esp32s3 --port <PORT> erase_flash
-esptool.py --chip esp32s3 --port <PORT> write_flash 0x0 ESP32-S3-Touch-AMOLED-2.06_FactoryOnly_20261016.bin
+esptool.py --chip esp32s3 --port <PORT> write_flash 0x0 <FILE>.bin
 ```
 
 The factory firmware source is in [`sourcecode`](sourcecode/).
