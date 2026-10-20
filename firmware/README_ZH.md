@@ -16,4 +16,4 @@ esptool.py --chip esp32s3 --port <PORT> erase_flash
 esptool.py --chip esp32s3 --port <PORT> write_flash 0x0 ESP32-S3-Touch-AMOLED-2.06_FactoryOnly_20261016.bin
 ```
 
-出厂固件源码在 [`sourcecode`](sourcecode/) 目录。
+出厂固件源码在 [`examples/factory`](../examples/factory/) 目录。

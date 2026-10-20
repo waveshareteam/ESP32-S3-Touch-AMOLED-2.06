@@ -48,7 +48,7 @@ The fastest way to try an example is a ready-to-flash package from the
 4. Run `flash_combined.bat COMx` on Windows or `./flash_combined.sh /dev/ttyACM0` on Linux.
 5. Reset the board if it does not restart automatically.
 
-Factory firmware (restores the out-of-box demo): download the file whose name contains `FactoryOnly` from the [`firmware`](firmware/) folder. Its source is in [`firmware/sourcecode`](firmware/sourcecode/).
+Factory firmware (restores the out-of-box demo): download the file whose name contains `FactoryOnly` from the [`firmware`](firmware/) folder. Its source is in [`examples/factory`](examples/factory/).
 
 ## 🧪 Examples
 
