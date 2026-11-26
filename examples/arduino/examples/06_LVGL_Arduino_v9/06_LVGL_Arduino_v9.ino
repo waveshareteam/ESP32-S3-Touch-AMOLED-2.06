@@ -113,7 +113,12 @@ void setup() {
   gfx->fillScreen(RGB565_BLACK);
 
   const char *controller = touch.begin();
-  USBSerial.println(controller ? controller : "Touch controller unavailable");
+  while (!controller) {
+    USBSerial.println("Touch controller unavailable");
+    delay(2000);
+    controller = touch.begin();
+  }
+  USBSerial.println(controller);
 
   lv_init();
 
