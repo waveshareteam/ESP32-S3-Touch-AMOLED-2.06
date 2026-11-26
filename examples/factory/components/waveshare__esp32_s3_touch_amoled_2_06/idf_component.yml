@@ -4,6 +4,7 @@ dependencies:
     version: ~1.5
   esp_lcd_panel_io_additions: ^1
   esp_lcd_touch_ft5x06: '*'
+  espressif/esp_lcd_touch_cst816s: '^1.1.1'
   espressif/esp_lvgl_port:
     public: true
     version: ^2
@@ -25,4 +26,4 @@ tags:
 targets:
 - esp32s3
 url: https://www.waveshare.com/esp32-s3-touch-amoled-2.06.htm
-version: 2.0.0
+version: 2.0.1

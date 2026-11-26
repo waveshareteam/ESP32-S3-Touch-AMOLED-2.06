@@ -3,4 +3,4 @@ dependencies:
     version: ">=5.5,<6.0"
   espressif/cjson: "1.7.19~2"
   lvgl/lvgl: "9.5.0"
-  waveshare/esp32_s3_touch_amoled_2_06: "^2.0.0"
+  waveshare/esp32_s3_touch_amoled_2_06: "^2.0.1"

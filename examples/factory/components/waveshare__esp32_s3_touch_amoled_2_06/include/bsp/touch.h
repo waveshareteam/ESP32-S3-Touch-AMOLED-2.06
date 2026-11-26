@@ -26,7 +26,8 @@ typedef struct {
  * @param[out] ret_touch esp_lcd_touch touchscreen handle
  * @return
  *      - ESP_OK         On success
- *      - Else           esp_lcd_touch failure
+ *      - ESP_ERR_NOT_FOUND  Neither supported touch controller responded
+ *      - Else           I2C or touch driver failure
  */
 esp_err_t bsp_touch_new(const bsp_touch_config_t *config, esp_lcd_touch_handle_t *ret_touch);
 
