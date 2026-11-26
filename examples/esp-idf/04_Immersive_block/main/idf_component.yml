@@ -10,8 +10,8 @@ dependencies:
 
   waveshare/qmi8658:
     version: "*"
-  # v2 is the current board BSP line; review a future major with both IDF lines and hardware.
-  waveshare/esp32_s3_touch_amoled_2_06: "^2.0.0"
+  # BSP 2.0.1 adds I2C detection for the CST820B touch panel.
+  waveshare/esp32_s3_touch_amoled_2_06: "^2.0.1"
   lvgl/lvgl:
     version: "9.5.0"
     public: true
