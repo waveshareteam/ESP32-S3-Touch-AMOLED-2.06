@@ -14,6 +14,7 @@
 
 #include "esp_lcd_sh8601.h"
 #include "esp_lcd_touch_ft5x06.h"
+#include "esp_lcd_touch_cst816s.h"
 
 #include "esp_codec_dev_defaults.h"
 #include "bsp/esp32_s3_touch_amoled_2_06.h"
@@ -662,14 +663,21 @@ esp_err_t bsp_display_new(const bsp_display_config_t *config, esp_lcd_panel_hand
 
 esp_err_t bsp_touch_new(const bsp_touch_config_t *config, esp_lcd_touch_handle_t *ret_touch)
 {
-    /* Initilize I2C */
-    BSP_ERROR_CHECK_RETURN_ERR(bsp_i2c_init());
+    ESP_RETURN_ON_FALSE(ret_touch, ESP_ERR_INVALID_ARG, TAG, "Missing touch handle");
+    *ret_touch = NULL;
+    ESP_RETURN_ON_ERROR(bsp_i2c_init(), TAG, "Touch I2C init failed");
 
-    /* Initialize touch */
+    /* Wake the controller before probing, including after a host-only reset. */
+    ESP_RETURN_ON_ERROR(gpio_set_direction(BSP_LCD_TOUCH_RST, GPIO_MODE_OUTPUT), TAG, "Touch reset GPIO");
+    ESP_RETURN_ON_ERROR(gpio_set_level(BSP_LCD_TOUCH_RST, 0), TAG, "Assert touch reset");
+    vTaskDelay(pdMS_TO_TICKS(20));
+    ESP_RETURN_ON_ERROR(gpio_set_level(BSP_LCD_TOUCH_RST, 1), TAG, "Release touch reset");
+    vTaskDelay(pdMS_TO_TICKS(120));
+
     const esp_lcd_touch_config_t tp_cfg = {
         .x_max = BSP_LCD_H_RES,
         .y_max = BSP_LCD_V_RES,
-        .rst_gpio_num = BSP_LCD_TOUCH_RST,
+        .rst_gpio_num = GPIO_NUM_NC, // Already reset before probing
         .int_gpio_num = BSP_LCD_TOUCH_INT,
         .levels = {
             .reset = 0,
@@ -681,11 +689,36 @@ esp_err_t bsp_touch_new(const bsp_touch_config_t *config, esp_lcd_touch_handle_t
             .mirror_y = 0,
         },
     };
-    esp_lcd_panel_io_handle_t tp_io_handle = NULL;
-    esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_FT5x06_CONFIG();
-    tp_io_config.scl_speed_hz = CONFIG_BSP_I2C_CLK_SPEED_HZ;
-    ESP_RETURN_ON_ERROR(esp_lcd_new_panel_io_i2c(i2c_handle, &tp_io_config, &tp_io_handle), TAG, "");
-    return esp_lcd_touch_new_i2c_ft5x06(tp_io_handle, &tp_cfg, ret_touch);
+    const struct {
+        const char *name;
+        esp_lcd_panel_io_i2c_config_t io;
+        esp_err_t (*create)(esp_lcd_panel_io_handle_t, const esp_lcd_touch_config_t *, esp_lcd_touch_handle_t *);
+    } controllers[] = {
+        {"CST820B", ESP_LCD_TOUCH_IO_I2C_CST816S_CONFIG(), esp_lcd_touch_new_i2c_cst816s},
+        {"FT6146", ESP_LCD_TOUCH_IO_I2C_FT5x06_CONFIG(), esp_lcd_touch_new_i2c_ft5x06},
+    };
+
+    for (size_t i = 0; i < sizeof(controllers) / sizeof(controllers[0]); ++i) {
+        esp_lcd_panel_io_i2c_config_t io_cfg = controllers[i].io;
+        esp_err_t ret = i2c_master_probe(i2c_handle, io_cfg.dev_addr, 100);
+        if (ret == ESP_ERR_NOT_FOUND) {
+            continue;
+        }
+        ESP_RETURN_ON_ERROR(ret, TAG, "Touch probe failed at 0x%02x", (unsigned)io_cfg.dev_addr);
+
+        esp_lcd_panel_io_handle_t io = NULL;
+        io_cfg.scl_speed_hz = CONFIG_BSP_I2C_CLK_SPEED_HZ;
+        ESP_RETURN_ON_ERROR(esp_lcd_new_panel_io_i2c(i2c_handle, &io_cfg, &io), TAG, "Create touch IO");
+        ret = controllers[i].create(io, &tp_cfg, ret_touch);
+        if (ret != ESP_OK) {
+            esp_lcd_panel_io_del(io);
+            return ret;
+        }
+        ESP_LOGI(TAG, "Touch controller: %s at 0x%02x", controllers[i].name, (unsigned)io_cfg.dev_addr);
+        return ESP_OK;
+    }
+    ESP_LOGE(TAG, "Neither CST820B nor FT6146 responded");
+    return ESP_ERR_NOT_FOUND;
 }
 
 static lv_display_t *bsp_display_lcd_init(const bsp_display_cfg_t *cfg)

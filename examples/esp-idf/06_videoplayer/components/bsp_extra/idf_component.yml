@@ -7,8 +7,8 @@ dependencies:
     version: '>=5.3.2'
 
   waveshare/esp32_s3_touch_amoled_2_06:
-    # v2 is the current board BSP line; review a future major with both IDF lines and hardware.
-    version: "^2.0.0"
+    # BSP 2.0.1 adds I2C detection for the CST820B touch panel.
+    version: "^2.0.1"
 
   chmorgan/esp-audio-player:
     version: "1.1.*"
